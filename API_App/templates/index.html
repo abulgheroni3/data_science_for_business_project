@@ -42,14 +42,60 @@
                     </select>
                 </label>
 
-                <label class="wide">
-                    <span>Evidences</span>
-                    <textarea name="evidences" rows="4" required>{{ form.evidences }}</textarea>
-                </label>
+                <div class="wide evidence-picker">
+                    <label for="evidence-select">
+                        <span>Evidence catalogue</span>
+                    </label>
+                    <div class="picker-row">
+                        <select id="evidence-select" {% if not evidence_options %}disabled{% endif %}>
+                            <option value="">
+                                {% if evidence_options %}Select an evidence description{% else %}Evidence metadata unavailable{% endif %}
+                            </option>
+                            {% for option in evidence_options %}
+                                <option
+                                    value="{{ option.value }}"
+                                    title="{{ option.title }}"
+                                    data-evidence-id="{{ option.evidence_id }}"
+                                    data-type="{{ option.data_type or '' }}"
+                                    data-antecedent="{{ option.is_antecedent }}"
+                                >
+                                    {{ option.label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="secondary-button" onclick="addSelectedEvidence()" {% if not evidence_options %}disabled{% endif %}>Add evidence</button>
+                    </div>
+
+                    <label for="selected-evidence-list" class="selected-label">
+                        <span>Selected evidence codes</span>
+                    </label>
+                    <select id="selected-evidence-list" class="selected-evidence-list" size="5" multiple></select>
+                    <textarea id="evidences" name="evidences" rows="3" readonly required>{{ form.evidences }}</textarea>
+
+                    <div class="evidence-actions">
+                        <button type="button" class="secondary-button subtle" onclick="removeSelectedEvidence()">Remove selected evidence</button>
+                        <button type="button" class="secondary-button subtle" onclick="clearEvidences()">Clear all evidences</button>
+                    </div>
+                    <p id="evidence-action-message" class="form-message" aria-live="polite"></p>
+                </div>
 
                 <label>
                     <span>Initial evidence</span>
-                    <input name="initial_evidence" type="text" value="{{ form.initial_evidence }}" placeholder="E_91">
+                    <select name="initial_evidence">
+                        <option value="">No initial evidence selected</option>
+                        {% if form.initial_evidence and form.initial_evidence not in evidence_option_values %}
+                            <option value="{{ form.initial_evidence }}" selected>{{ form.initial_evidence }}</option>
+                        {% endif %}
+                        {% for option in evidence_options %}
+                            <option
+                                value="{{ option.value }}"
+                                title="{{ option.title }}"
+                                {% if option.value == form.initial_evidence %}selected{% endif %}
+                            >
+                                {{ option.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </label>
 
                 <label>
@@ -146,7 +192,7 @@
         <section class="metadata-panel" aria-labelledby="metadata-heading">
             <h2 id="metadata-heading">Metadata Helper</h2>
             {% if sample_evidences %}
-                <p class="helper-text">A few available evidence IDs from <code>release_evidences.json</code>:</p>
+                <p class="helper-text">A few available evidence IDs from <code>release_evidences.json</code>. Dropdown source: {{ evidence_options_source }}.</p>
                 <div class="metadata-list">
                     {% for item in sample_evidences %}
                         <div class="metadata-item">
@@ -184,5 +230,77 @@
             {% endif %}
         </section>
     </main>
+
+    <script>
+        const evidenceTextarea = document.getElementById("evidences");
+        const selectedEvidenceList = document.getElementById("selected-evidence-list");
+        const evidenceSelect = document.getElementById("evidence-select");
+        const evidenceMessage = document.getElementById("evidence-action-message");
+
+        function parseSelectedCodes() {
+            return evidenceTextarea.value
+                .split(",")
+                .map((code) => code.trim())
+                .filter(Boolean);
+        }
+
+        function writeSelectedCodes(codes) {
+            evidenceTextarea.value = codes.join(", ");
+            syncSelectedEvidenceList();
+        }
+
+        function syncSelectedEvidenceList() {
+            selectedEvidenceList.innerHTML = "";
+            parseSelectedCodes().forEach((code) => {
+                const option = document.createElement("option");
+                option.value = code;
+                option.textContent = code;
+                option.title = code;
+                selectedEvidenceList.appendChild(option);
+            });
+        }
+
+        function setEvidenceMessage(message, isError = false) {
+            evidenceMessage.textContent = message;
+            evidenceMessage.classList.toggle("is-error", isError);
+        }
+
+        function addSelectedEvidence() {
+            const selectedCode = evidenceSelect.value;
+            if (!selectedCode) {
+                setEvidenceMessage("Select an evidence first.", true);
+                return;
+            }
+
+            const codes = parseSelectedCodes();
+            if (codes.includes(selectedCode)) {
+                setEvidenceMessage("Evidence already selected.", true);
+                return;
+            }
+
+            codes.push(selectedCode);
+            writeSelectedCodes(codes);
+            setEvidenceMessage(`Added ${selectedCode}.`);
+        }
+
+        function removeSelectedEvidence() {
+            const selectedCodes = Array.from(selectedEvidenceList.selectedOptions).map((option) => option.value);
+            if (selectedCodes.length === 0) {
+                setEvidenceMessage("Select a code to remove.", true);
+                return;
+            }
+
+            const remainingCodes = parseSelectedCodes().filter((code) => !selectedCodes.includes(code));
+            writeSelectedCodes(remainingCodes);
+            setEvidenceMessage("Selected evidence removed.");
+        }
+
+        function clearEvidences() {
+            writeSelectedCodes([]);
+            setEvidenceMessage("All evidences cleared.");
+        }
+
+        syncSelectedEvidenceList();
+    </script>
 </body>
 </html>

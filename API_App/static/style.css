@@ -196,6 +196,79 @@ button:hover {
     background: var(--accent-dark);
 }
 
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.secondary-button {
+    padding: 0 16px;
+    background: #2f6762;
+    white-space: nowrap;
+}
+
+.secondary-button.subtle {
+    min-height: 38px;
+    background: var(--surface-muted);
+    color: var(--text);
+    border: 1px solid var(--line);
+}
+
+.secondary-button.subtle:hover {
+    background: #dfe9e6;
+}
+
+.evidence-picker {
+    display: grid;
+    gap: 10px;
+}
+
+.picker-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+}
+
+#evidence-select,
+select[name="initial_evidence"] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.selected-label {
+    margin-top: 4px;
+}
+
+.selected-evidence-list {
+    min-height: 116px;
+    font-family: "Cascadia Mono", Consolas, monospace;
+}
+
+#evidences {
+    min-height: 76px;
+    background: #fbfcfc;
+    font-family: "Cascadia Mono", Consolas, monospace;
+}
+
+.evidence-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.form-message {
+    min-height: 20px;
+    margin: 0;
+    color: var(--accent-dark);
+    font-size: 0.88rem;
+    font-weight: 650;
+}
+
+.form-message.is-error {
+    color: var(--error-text);
+}
+
 code {
     border-radius: 5px;
     padding: 2px 6px;
@@ -337,6 +410,10 @@ dd {
     .main-grid,
     .prediction-form,
     .summary-row {
+        grid-template-columns: 1fr;
+    }
+
+    .picker-row {
         grid-template-columns: 1fr;
     }
 
