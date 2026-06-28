@@ -431,4 +431,60 @@ dd {
     .metadata-item {
         grid-template-columns: 1fr;
     }
+    .evidence-catalogue {
+    display: block;
+}
+
+.evidence-picker {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+}
+
+.inline-button {
+    padding: 0 22px;
+    white-space: nowrap;
+}
+
+.selected-evidence-list {
+    min-height: 130px;
+    font-family: "Cascadia Mono", Consolas, monospace;
+}
+
+.evidence-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.secondary-button {
+    width: auto;
+    min-height: 42px;
+    padding: 0 18px;
+    border: 1px solid var(--line);
+    background: var(--surface-muted);
+    color: var(--text);
+}
+
+.secondary-button:hover {
+    background: #dfe9e6;
+}
+
+button:disabled,
+select:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+@media (max-width: 820px) {
+    .evidence-picker {
+        grid-template-columns: 1fr;
+    }
+
+    .inline-button,
+    .secondary-button {
+        width: 100%;
+    }
+}
 }

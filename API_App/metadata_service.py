@@ -83,6 +83,43 @@ class MetadataService:
                 }
             )
         return records
+    
+    # 28062026 - AB - Aggiunto per mostrare le descrizioni delle evidenze, pur mantenendo
+    # -- -- la funzione list_evidence_options() per la UI
+    def list_evidence_options(self, limit: int | None = None) -> list[dict[str, Any]]:
+        records: list[dict[str, Any]] = []
+
+        for evidence_id, metadata in self.evidences.items():
+            question = metadata.get("question_en") or "Metadata label unavailable"
+            value_meaning = metadata.get("value_meaning", {})
+
+            if isinstance(value_meaning, dict) and value_meaning:
+                for value_key, value_metadata in value_meaning.items():
+                    if isinstance(value_metadata, dict):
+                        value_label = value_metadata.get("en") or str(value_key)
+                    else:
+                        value_label = str(value_metadata)
+
+                    records.append(
+                        {
+                            "token": f"{evidence_id}_@_{value_key}",
+                            "evidence_id": evidence_id,
+                            "label": f"{question} — {value_label}",
+                        }
+                    )
+            else:
+                records.append(
+                    {
+                        "token": evidence_id,
+                        "evidence_id": evidence_id,
+                        "label": question,
+                    }
+                )
+
+        if limit is not None:
+            return records[:limit]
+
+        return records
 
     def list_evidence_options(self) -> list[dict[str, Any]]:
         """Return dropdown-ready evidence options for the web UI.

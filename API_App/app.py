@@ -125,6 +125,16 @@ def _template_context(
         "evidence_option_values": [
             option["value"] for option in metadata_service.list_evidence_options()
         ],
+        "evidence_options": (
+            metadata_service.list_evidence_options()
+            if metadata_service.evidences_loaded
+            else []
+        ),
+        "all_evidences": (
+            metadata_service.list_evidences(limit=len(metadata_service.evidences))
+            if metadata_service.evidences_loaded
+            else []
+        ),
         "result": result,
         "error": error,
         "form": form_values
