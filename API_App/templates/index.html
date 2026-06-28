@@ -41,7 +41,6 @@
                         <option value="F" {% if form.sex|upper == "F" %}selected{% endif %}>F</option>
                     </select>
                 </label>
-
                 <div class="wide evidence-catalogue">
                     <label for="evidence_catalogue">
                         <span>Evidence catalogue</span>
@@ -51,15 +50,11 @@
                         <select id="evidence_catalogue" {% if not evidence_options %}disabled{% endif %}>
                             {% if evidence_options %}
                                 <option value="" selected disabled>Select evidence description</option>
-                                
-                                <!-- 
                                 {% for item in evidence_options %}
-                                    <option value="{{ item.token }}" title="{{ item.label }}">
+                                    <option value="{{ item.value }}" title="{{ item.title or item.label }}">
                                         {{ item.label }}
                                     </option>
                                 {% endfor %}
-                                -->
-
                                 {% for item in evidence_options %}
                                     <option value="{{ item.value }}" title="{{ item.title or item.label }}">
                                         {{ item.label }}
@@ -320,79 +315,5 @@
             {% endif %}
         </section>
     </main>
-<!--
-
-    <script>
-        const evidenceTextarea = document.getElementById("evidences");
-        const selectedEvidenceList = document.getElementById("selected-evidence-list");
-        const evidenceSelect = document.getElementById("evidence-select");
-        const evidenceMessage = document.getElementById("evidence-action-message");
-
-        function parseSelectedCodes() {
-            return evidenceTextarea.value
-                .split(",")
-                .map((code) => code.trim())
-                .filter(Boolean);
-        }
-
-        function writeSelectedCodes(codes) {
-            evidenceTextarea.value = codes.join(", ");
-            syncSelectedEvidenceList();
-        }
-
-        function syncSelectedEvidenceList() {
-            selectedEvidenceList.innerHTML = "";
-            parseSelectedCodes().forEach((code) => {
-                const option = document.createElement("option");
-                option.value = code;
-                option.textContent = code;
-                option.title = code;
-                selectedEvidenceList.appendChild(option);
-            });
-        }
-
-        function setEvidenceMessage(message, isError = false) {
-            evidenceMessage.textContent = message;
-            evidenceMessage.classList.toggle("is-error", isError);
-        }
-
-        function addSelectedEvidence() {
-            const selectedCode = evidenceSelect.value;
-            if (!selectedCode) {
-                setEvidenceMessage("Select an evidence first.", true);
-                return;
-            }
-
-            const codes = parseSelectedCodes();
-            if (codes.includes(selectedCode)) {
-                setEvidenceMessage("Evidence already selected.", true);
-                return;
-            }
-
-            codes.push(selectedCode);
-            writeSelectedCodes(codes);
-            setEvidenceMessage(`Added ${selectedCode}.`);
-        }
-
-        function removeSelectedEvidence() {
-            const selectedCodes = Array.from(selectedEvidenceList.selectedOptions).map((option) => option.value);
-            if (selectedCodes.length === 0) {
-                setEvidenceMessage("Select a code to remove.", true);
-                return;
-            }
-
-            const remainingCodes = parseSelectedCodes().filter((code) => !selectedCodes.includes(code));
-            writeSelectedCodes(remainingCodes);
-            setEvidenceMessage("Selected evidence removed.");
-        }
-
-        function clearEvidences() {
-            writeSelectedCodes([]);
-            setEvidenceMessage("All evidences cleared.");
-        }
-
-        syncSelectedEvidenceList();
-    </script>
--->
 </body>
 </html>
