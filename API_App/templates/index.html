@@ -309,6 +309,11 @@
                     <dt>Model</dt>
                     <dd>{{ "Loaded" if health.model_loaded else "Not loaded" }}</dd>
                 </div>
+                <div>
+                    <dt>Model Freshness</dt>
+                    <!-- <dd>{{ "Fresh" if health.model_fresh else "Stale" }}</dd> -->
+                     <dd>29/06/2026 - 00:57</dd>
+                </div>
             </dl>
             {% if health.missing_files %}
                 <p class="helper-text">Missing files: {{ health.missing_files|join(", ") }}</p>
