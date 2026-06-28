@@ -84,6 +84,7 @@ class MetadataService:
             )
         return records
     
+    """""
     # 28062026 - AB - Aggiunto per mostrare le descrizioni delle evidenze, pur mantenendo
     # -- -- la funzione list_evidence_options() per la UI
     def list_evidence_options(self, limit: int | None = None) -> list[dict[str, Any]]:
@@ -120,7 +121,8 @@ class MetadataService:
             return records[:limit]
 
         return records
-
+    """
+    
     def list_evidence_options(self) -> list[dict[str, Any]]:
         """Return dropdown-ready evidence options for the web UI.
 

@@ -51,8 +51,17 @@
                         <select id="evidence_catalogue" {% if not evidence_options %}disabled{% endif %}>
                             {% if evidence_options %}
                                 <option value="" selected disabled>Select evidence description</option>
+                                
+                                <!-- 
                                 {% for item in evidence_options %}
                                     <option value="{{ item.token }}" title="{{ item.label }}">
+                                        {{ item.label }}
+                                    </option>
+                                {% endfor %}
+                                -->
+
+                                {% for item in evidence_options %}
+                                    <option value="{{ item.value }}" title="{{ item.title or item.label }}">
                                         {{ item.label }}
                                     </option>
                                 {% endfor %}
@@ -311,6 +320,7 @@
             {% endif %}
         </section>
     </main>
+<!--
 
     <script>
         const evidenceTextarea = document.getElementById("evidences");
@@ -383,5 +393,6 @@
 
         syncSelectedEvidenceList();
     </script>
+-->
 </body>
 </html>
