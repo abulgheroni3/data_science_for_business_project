@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Explainable Differential Diagnosis Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <header class="page-header">
+        <div class="layout">
+            <p class="eyebrow">Data Science for Business exam project</p>
+            <h1>Explainable Differential Diagnosis Assistant</h1>
+            <p class="intro">
+                Educational FastAPI prototype for DDXPlus telemedicine triage experiments, designed to expose metadata,
+                accept patient evidence tokens, and integrate with future trained sklearn artifacts.
+            </p>
+            <p class="disclaimer">This tool is for educational purposes only and is not a real medical diagnosis.</p>
+        </div>
+    </header>
+
+    <main class="layout main-grid">
+        <section class="tool-panel" aria-labelledby="predict-heading">
+            <div class="section-heading">
+                <h2 id="predict-heading">Prediction Input</h2>
+                <span class="status-pill {% if health.model_loaded %}ready{% else %}pending{% endif %}">
+                    {% if health.model_loaded %}Model ready{% else %}Model artifacts pending{% endif %}
+                </span>
+            </div>
+
+            <form method="post" action="/web-predict" class="prediction-form">
+                <label>
+                    <span>Age</span>
+                    <input name="age" type="number" min="0" max="130" value="{{ form.age }}" required>
+                </label>
+
+                <label>
+                    <span>Sex</span>
+                    <select name="sex" required>
+                        <option value="M" {% if form.sex|upper == "M" %}selected{% endif %}>M</option>
+                        <option value="F" {% if form.sex|upper == "F" %}selected{% endif %}>F</option>
+                    </select>
+                </label>
+
+                <label class="wide">
+                    <span>Evidences</span>
+                    <textarea name="evidences" rows="4" required>{{ form.evidences }}</textarea>
+                </label>
+
+                <label>
+                    <span>Initial evidence</span>
+                    <input name="initial_evidence" type="text" value="{{ form.initial_evidence }}" placeholder="E_91">
+                </label>
+
+                <label>
+                    <span>Top-k</span>
+                    <input name="k" type="number" min="1" max="20" value="{{ form.k }}" required>
+                </label>
+
+                <button type="submit">Run Prediction</button>
+            </form>
+
+            <div class="examples">
+                <h3>Valid token examples</h3>
+                <p><code>E_91</code> <code>E_201</code> <code>E_66</code> <code>E_56_@_4</code> <code>E_54_@_V_161</code></p>
+            </div>
+        </section>
+
+        <section class="result-panel" aria-labelledby="result-heading">
+            <h2 id="result-heading">Result</h2>
+
+            {% if error %}
+                <div class="message error">
+                    <strong>Prediction unavailable</strong>
+                    <p>{{ error }}</p>
+                </div>
+            {% elif result %}
+                <div class="summary-row">
+                    <div>
+                        <span class="label">Predicted diagnosis</span>
+                        <strong>{{ result.predicted_diagnosis }}</strong>
+                    </div>
+                    <div>
+                        <span class="label">Confidence</span>
+                        <strong>
+                            {% if result.confidence is not none %}
+                                {{ "%.2f"|format(result.confidence * 100) }}%
+                            {% else %}
+                                Not available
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div>
+                        <span class="label">Evidence count</span>
+                        <strong>{{ result.input_summary.n_evidences }}</strong>
+                    </div>
+                </div>
+
+                <h3>Top diagnoses</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Diagnosis</th>
+                                <th>Probability</th>
+                                <th>ICD10</th>
+                                <th>Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in result.top_k_diagnoses %}
+                                <tr>
+                                    <td>{{ item.diagnosis }}</td>
+                                    <td>
+                                        {% if item.probability is not none %}
+                                            {{ "%.2f"|format(item.probability * 100) }}%
+                                        {% else %}
+                                            Not available
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.icd10_id or "Not available" }}</td>
+                                    <td>{{ item.severity if item.severity is not none else "Not available" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Interpreted evidences</h3>
+                <ul class="evidence-list">
+                    {% for evidence in result.interpreted_evidences %}
+                        <li>
+                            <code>{{ evidence.raw }}</code>
+                            <span>{{ evidence.question_en or "Metadata label unavailable" }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="message neutral">
+                    <strong>No prediction yet</strong>
+                    <p>Submit a case to see model output. If artifacts are missing, a controlled message will appear here.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="metadata-panel" aria-labelledby="metadata-heading">
+            <h2 id="metadata-heading">Metadata Helper</h2>
+            {% if sample_evidences %}
+                <p class="helper-text">A few available evidence IDs from <code>release_evidences.json</code>:</p>
+                <div class="metadata-list">
+                    {% for item in sample_evidences %}
+                        <div class="metadata-item">
+                            <code>{{ item.evidence_id }}</code>
+                            <span>{{ item.question_en }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="message error">
+                    <strong>Evidence metadata unavailable</strong>
+                    <p>The application can still start, but metadata endpoints need <code>release_evidences.json</code>.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="status-panel" aria-labelledby="status-heading">
+            <h2 id="status-heading">Runtime Status</h2>
+            <dl>
+                <div>
+                    <dt>Evidence metadata</dt>
+                    <dd>{{ "Loaded" if health.metadata_loaded else "Missing" }}</dd>
+                </div>
+                <div>
+                    <dt>Condition metadata</dt>
+                    <dd>{{ "Loaded" if health.conditions_loaded else "Missing" }}</dd>
+                </div>
+                <div>
+                    <dt>Model</dt>
+                    <dd>{{ "Loaded" if health.model_loaded else "Not loaded" }}</dd>
+                </div>
+            </dl>
+            {% if health.missing_files %}
+                <p class="helper-text">Missing files: {{ health.missing_files|join(", ") }}</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

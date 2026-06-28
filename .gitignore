@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+
+.env
+.venv/
+venv/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+data/raw/*.csv
+data/processed/
+
+API_App/artifacts/*.pkl
+API_App/artifacts/*.joblib
